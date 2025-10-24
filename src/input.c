@@ -1,76 +1,66 @@
 #include "input.h"
 #include <string.h>
-#include <stdbool.h>
+#include <psp2/kernel/processmgr.h>
+#include <vita2d.h>
 
-int current_input_step = 0;
-bool input_complete = false;
-bool show_cmd_dialog = false;
-int shown_dial = 0;
-
-uint16_t ip_input[MAX_TEXT_LENGTH + 1] = {0};
-uint16_t port_input[MAX_TEXT_LENGTH + 1] = {0};
-uint16_t user_input[MAX_TEXT_LENGTH + 1] = {0};
-uint16_t pass_input[MAX_TEXT_LENGTH + 1] = {0};
-uint16_t cmd_input[MAX_TEXT_LENGTH + 1] = {0};
-
-void wchar_to_char(const uint16_t *wstr, char *str, size_t max_len) {
+void utf16_to_utf8(const uint16_t* src, char* dst, size_t dst_size) {
     size_t i;
-    for (i = 0; i < max_len - 1 && wstr[i] != 0; i++) {
-        str[i] = (char)wstr[i];
+    for (i = 0; i < dst_size - 1 && src[i] != 0; i++) {
+        dst[i] = (char)(src[i] & 0xFF);
     }
-    str[i] = '\0';
+    dst[i] = '\0';
 }
 
-void show_current_input_dialog() {
+int kb(const uint16_t* title, uint16_t* initial_text, uint16_t* output_buffer, int password_mode) {
+    SceCommonDialogConfigParam config;
+    sceCommonDialogConfigParamInit(&config);
+    sceCommonDialogSetConfigParam(&config);
+
     SceImeDialogParam param;
     sceImeDialogParamInit(&param);
-
     param.supportedLanguages = SCE_IME_LANGUAGE_ENGLISH;
     param.languagesForced = SCE_TRUE;
-    param.type = SCE_IME_TYPE_BASIC_LATIN;
+    param.type = SCE_IME_TYPE_DEFAULT;
     param.option = 0;
+    param.textBoxMode = password_mode ? SCE_IME_DIALOG_TEXTBOX_MODE_PASSWORD : SCE_IME_DIALOG_TEXTBOX_MODE_DEFAULT;
+    param.title = title;
+    param.maxTextLength = MAX_TEXT_LENGTH;
+    param.initialText = initial_text;
+    param.inputTextBuffer = output_buffer;
+
+    sceImeDialogInit(&param);
+
+    int result = 0;
+    int done = 0;
     
-    switch (current_input_step) {
-        case 0:
-            param.title = u"Server IP Address:";
-            param.initialText = u"192.168.1.1";
-            param.inputTextBuffer = ip_input;
-            break;
-        case 1:
-            param.title = u"SSH Port:";
-            param.initialText = u"22";
-            param.inputTextBuffer = port_input;
-            break;
-        case 2:
-            param.title = u"Username:";
-            param.initialText = u"root";
-            param.inputTextBuffer = user_input;
-            break;
-        case 3:
-            param.title = u"Password:";
-            param.initialText = u"";
-            param.inputTextBuffer = pass_input;
-            param.textBoxMode = SCE_IME_DIALOG_TEXTBOX_MODE_PASSWORD;
-            break;
+    while (!done) {
+        SceCommonDialogUpdateParam update_param;
+        memset(&update_param, 0, sizeof(update_param));
+        update_param.renderTarget.colorSurfaceData = vita2d_get_current_fb();
+        update_param.renderTarget.surfaceType = SCE_GXM_COLOR_SURFACE_LINEAR;
+        update_param.renderTarget.colorFormat = SCE_GXM_COLOR_FORMAT_A8B8G8R8;
+        update_param.renderTarget.width = 960;
+        update_param.renderTarget.height = 544;
+        update_param.renderTarget.strideInPixels = 960;
+
+        sceCommonDialogUpdate(&update_param);
+
+        if (sceImeDialogGetStatus() == SCE_COMMON_DIALOG_STATUS_FINISHED) {
+            SceImeDialogResult ime_result;
+            memset(&ime_result, 0, sizeof(ime_result));
+            sceImeDialogGetResult(&ime_result);
+            
+            if (ime_result.button == SCE_IME_DIALOG_BUTTON_ENTER) {
+                result = 1;
+            } else {
+                result = 0;
+            }
+            sceImeDialogTerm();
+            done = 1;
+        }
+        
+        sceKernelDelayThread(10000);
     }
     
-    param.maxTextLength = MAX_TEXT_LENGTH;
-    shown_dial = sceImeDialogInit(&param) > 0;
-}
-
-void show_command_dialog() {
-    SceImeDialogParam param;
-    sceImeDialogParamInit(&param);
-
-    param.supportedLanguages = SCE_IME_LANGUAGE_ENGLISH;
-    param.languagesForced = SCE_TRUE;
-    param.type = SCE_IME_TYPE_BASIC_LATIN;
-    param.option = 0;
-    param.title = u"Command to execute:";
-    param.initialText = u"ls -la";
-    param.inputTextBuffer = cmd_input;
-    param.maxTextLength = MAX_TEXT_LENGTH;
-    
-    shown_dial = sceImeDialogInit(&param) > 0;
-    show_cmd_dialog = true;
+    return result;
 }

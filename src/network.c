@@ -1,12 +1,11 @@
 #include "network.h"
+
+#include <psp2/kernel/processmgr.h>
 #include <psp2/net/net.h>
 #include <psp2/net/netctl.h>
 #include <psp2/sysmodule.h>
 #include <stdio.h>
 #include <string.h>
-#include "debugScreen.h"
-
-#define printf psvDebugScreenPrintf
 
 void *net_memory = NULL;
 SceUID net_memid = -1;

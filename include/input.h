@@ -1,29 +1,13 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include <psp2/common_dialog.h>
 #include <psp2/ime_dialog.h>
-#include <stdbool.h>
 
 #define MAX_TEXT_LENGTH SCE_IME_DIALOG_MAX_TEXT_LENGTH
 
-// Input dialogs
-void show_current_input_dialog();
-void show_command_dialog();
+int kb(const uint16_t* title, uint16_t* initial_text, uint16_t* output_buffer, int password_mode);
 
-// Utility functions
-void wchar_to_char(const uint16_t *wstr, char *str, size_t max_len);
-
-// Global input state
-extern int current_input_step;
-extern bool input_complete;
-extern bool show_cmd_dialog;
-extern int shown_dial;
-
-// Input buffers
-extern uint16_t ip_input[MAX_TEXT_LENGTH + 1];
-extern uint16_t port_input[MAX_TEXT_LENGTH + 1];
-extern uint16_t user_input[MAX_TEXT_LENGTH + 1];
-extern uint16_t pass_input[MAX_TEXT_LENGTH + 1];
-extern uint16_t cmd_input[MAX_TEXT_LENGTH + 1];
+void utf16_to_utf8(const uint16_t* src, char* dst, size_t dst_size);
 
 #endif

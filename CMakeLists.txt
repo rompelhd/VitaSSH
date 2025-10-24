@@ -35,14 +35,16 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
 # --- Sources ---
 add_executable(${PROJECT_NAME}
   src/main.c
-  src/graphics.c
+  src/input.c
   src/network.c
   src/ssh_client.c
-  src/input.c
-  src/debugScreen.c
+  src/shell.c
+  src/text.c
+  src/ansi_colors.c
 )
 
 target_link_libraries(${PROJECT_NAME}
+  vita2d
   ssh2
   ssl
   crypto
@@ -59,7 +61,10 @@ target_link_libraries(${PROJECT_NAME}
   SceAppUtil_stub
   SceSysmem_stub
   SceCommonDialog_stub
+  SceAppMgr_stub
+  ScePgf_stub
 )
+
 
 # --- Crear SELF y VPK ---
 vita_create_self(${PROJECT_NAME}.self ${PROJECT_NAME})

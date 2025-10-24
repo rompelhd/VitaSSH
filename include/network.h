@@ -3,7 +3,6 @@
 
 #include <psp2/kernel/sysmem.h>
 
-// Manual definition if not in SDK
 #ifndef SCE_SYSMODULE_NET_CTL
 #define SCE_SYSMODULE_NET_CTL 0x9
 #endif
