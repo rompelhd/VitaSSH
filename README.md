@@ -5,73 +5,10 @@ VitaSSH is a proof-of-concept SSH client designed specifically for the PlayStati
 ## 🛠 Technical Foundation
 
 **Built with:**
-- **libssh2**: Comprehensive SSH2 protocol implementation.
+- **Libssh2**: Comprehensive SSH2 protocol implementation.
+- **Vita2d**: Vita2d library for creating 2D graphics.
 - **VitaSDK**: Official PlayStation Vita homebrew SDK.
-- **PSVita GXM**: Low-level graphics framework for Vita.
 - **IME Dialog System**: Vita's on-screen keyboard interface.
-
-## 📁 Project Structure
-
-```plaintext
-vitassh2/
-├── CMakeLists.txt          # VitaSDK build configuration
-├── include/               # Header files
-│   ├── graphics.h         # GXM display management
-│   ├── network.h          # Vita network stack wrapper
-│   ├── ssh_client.h       # libssh2 session handling
-│   ├── input.h            # IME dialog interfaces
-│   └── debugScreen.h      # Text output system
-└── src/                   # Source implementation
-    ├── main.c             # Application lifecycle & state machine
-    ├── graphics.c         # Double-buffered rendering
-    ├── network.c          # NetCtl & socket initialization
-    ├── ssh_client.c       # SSH command execution engine
-    ├── input.c            # Keyboard input handling
-    └── debugScreen.c      # VRAM text rendering
-```
-## 🔧 Core Architecture
-
-### Graphics Subsystem (`graphics.c/h`)
-- GXM double-buffered rendering for a smooth UI.
-- CDRAM memory allocation for GPU-optimized buffers.
-- VSync-synchronized swapping to prevent tearing.
-- Automatic display queue management.
-
-### Network Layer (`network.c/h`)
-- 512KB dedicated network memory block allocation.
-- SCE_NETCTL state monitoring for connection tracking.
-- Modular system module loading (SceNet, SceNetCtl).
-- 10-second connection timeout with status feedback.
-
-### SSH Engine (`ssh_client.c/h`)
-- libssh2 session lifecycle management.
-- Character filtering system for Vita-safe output.
-- ANSI escape sequence stripping for compatibility.
-- Non-blocking channel execution with error handling.
-
-### Input System (`input.c/h`)
-- Sequential credential collection (IP → Port → User → Password).
-- UTF-16 to ASCII conversion for Vita IME compatibility.
-- Modal dialog state management.
-- Password field security with hidden input.
-
-## 🎮 User Interface Flow
-
-### Configuration Phase (GXM Graphics)
-- IP Address input.
-- SSH Port selection (default: 22).
-- Username entry.
-- Password input (masked).
-
-### Connection Phase (Debug Screen)
-- Network module initialization.
-- SSH handshake and authentication.
-- Status reporting.
-
-### Command Phase (Hybrid Graphics/Debug)
-- **TRIANGLE**: Open IME keyboard for commands.
-- **SQUARE**: Exit application.
-- Dynamic graphics reinitialization for input dialogs.
 
 ## ⚡ Features and Limitations
 
@@ -162,7 +99,7 @@ make
 
 - Limited output buffer for long command responses  
 - No support for interactive programs (`vim`, `top`, etc.)  
-- Character encoding limitations for non-ASCII text  
+- ~~Character encoding limitations for non-ASCII text~~ ✅ 
 - Occasional timeouts on unstable network connections
 
 ---
