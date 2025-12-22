@@ -16,6 +16,7 @@ char username[64] = "";
 char password[64] = "";
 
 LIBSSH2_SESSION *session = NULL;
+LIBSSH2_CHANNEL *channel = NULL;
 int sock = -1;
 
 static LIBSSH2_CHANNEL *interactive_channel = NULL;
@@ -35,6 +36,65 @@ int get_terminal_width() {
 
 int get_terminal_height() {
     return current_term_height;
+}
+
+int execute_ssh_command(const char *cmd) {
+    if (!session) {
+        terminal_print("Error: SSH session not initialized");
+        return -1;
+    }
+
+    if (channel) {
+        libssh2_channel_free(channel);
+        channel = NULL;
+    }
+    
+    channel = libssh2_channel_open_session(session);
+    if (!channel) {
+        terminal_print("Error opening SSH channel");
+        return -1;
+    }
+    
+    int rc = libssh2_channel_exec(channel, cmd);
+    if (rc) {
+        terminal_print("Error executing command");
+        libssh2_channel_free(channel);
+        channel = NULL;
+        return -1;
+    }
+
+    char buffer[4096];
+    ssize_t n;
+    int has_output = 0;
+    
+    char big_buffer[16384] = {0};
+    int big_buffer_pos = 0;
+    
+    while ((n = libssh2_channel_read(channel, buffer, sizeof(buffer)-1)) > 0) {
+        buffer[n] = '\0';
+        
+        if (big_buffer_pos + n < sizeof(big_buffer) - 1) {
+            strcat(big_buffer + big_buffer_pos, buffer);
+            big_buffer_pos += n;
+        }
+        has_output = 1;
+    }
+
+    if (has_output && big_buffer_pos > 0) {
+        terminal_print_ansi(big_buffer);
+    } else if (!has_output) {
+        terminal_print("(No output)");
+    }
+
+    if (n < 0 && n != LIBSSH2_ERROR_EAGAIN) {
+        char error_msg[64];
+        snprintf(error_msg, sizeof(error_msg), "Error reading output: %d", (int)n);
+        terminal_print(error_msg);
+    }
+    
+    libssh2_channel_free(channel);
+    channel = NULL;
+    return 0;
 }
 
 int ssh_connect() {
@@ -104,6 +164,13 @@ int ssh_connect() {
 
     terminal_print("Authentication successful");
 
+    terminal_print("Opening SSH channel...");
+    channel = libssh2_channel_open_session(session);
+    if (!channel) {
+        terminal_print("Error opening SSH channel");
+        goto cleanup_session;
+    }
+
     return 0;
 
 cleanup_session:
@@ -131,6 +198,12 @@ int start_interactive_shell() {
 
     terminal_print("Starting interactive shell (pty)...");
 
+    if (channel) {
+        libssh2_channel_close(channel);
+        libssh2_channel_free(channel);
+        channel = NULL;
+    }
+    
     if (interactive_channel) {
         libssh2_channel_free(interactive_channel);
         interactive_channel = NULL;
@@ -237,6 +310,12 @@ void cleanup_ssh() {
     
     if (in_interactive_mode) {
         stop_interactive_shell();
+    }
+    
+    if (channel) {
+        libssh2_channel_close(channel);
+        libssh2_channel_free(channel);
+        channel = NULL;
     }
 
     if (session) {
