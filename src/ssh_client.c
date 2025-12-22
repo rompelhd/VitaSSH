@@ -1,6 +1,5 @@
 #include "ssh_client.h"
 #include "text.h"
-#include "ansi_colors.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,14 +22,28 @@ int sock = -1;
 static LIBSSH2_CHANNEL *interactive_channel = NULL;
 static int in_interactive_mode = 0;
 
+static int current_term_width = TERMINAL_WIDTH;
+static int current_term_height = TERMINAL_HEIGHT;
+
+void set_terminal_size(int width, int height) {
+    current_term_width = width;
+    current_term_height = height;
+}
+
+int get_terminal_width() {
+    return current_term_width;
+}
+
+int get_terminal_height() {
+    return current_term_height;
+}
+
 int execute_ssh_command(const char *cmd) {
     if (!session) {
         terminal_print("Error: SSH session not initialized");
         return -1;
     }
 
-    char msg[128];
-    
     if (channel) {
         libssh2_channel_free(channel);
         channel = NULL;
@@ -50,31 +63,32 @@ int execute_ssh_command(const char *cmd) {
         return -1;
     }
 
-    char buffer[1024];
+    char buffer[4096];
     ssize_t n;
     int has_output = 0;
     
+    char big_buffer[16384] = {0};
+    int big_buffer_pos = 0;
+    
     while ((n = libssh2_channel_read(channel, buffer, sizeof(buffer)-1)) > 0) {
         buffer[n] = '\0';
-                
-        char *line = strtok(buffer, "\n");
-        while (line != NULL) {
-            if (strlen(line) > 0) {
-                // Use terminal_print_ansi to process ANSI colors
-                terminal_print_ansi(line);
-                has_output = 1;
-            }
-            line = strtok(NULL, "\n");
+        
+        if (big_buffer_pos + n < sizeof(big_buffer) - 1) {
+            strcat(big_buffer + big_buffer_pos, buffer);
+            big_buffer_pos += n;
         }
+        has_output = 1;
     }
 
-    if (!has_output) {
+    if (has_output && big_buffer_pos > 0) {
+        terminal_print_ansi(big_buffer);
+    } else if (!has_output) {
         terminal_print("(No output)");
     }
 
     if (n < 0 && n != LIBSSH2_ERROR_EAGAIN) {
         char error_msg[64];
-        snprintf(error_msg, sizeof(error_msg), "Error reading output: %ld", n);
+        snprintf(error_msg, sizeof(error_msg), "Error reading output: %d", (int)n);
         terminal_print(error_msg);
     }
     
@@ -183,6 +197,12 @@ int start_interactive_shell() {
     }
 
     terminal_print("Starting interactive shell (pty)...");
+
+    if (channel) {
+        libssh2_channel_close(channel);
+        libssh2_channel_free(channel);
+        channel = NULL;
+    }
     
     if (interactive_channel) {
         libssh2_channel_free(interactive_channel);
@@ -194,6 +214,14 @@ int start_interactive_shell() {
         terminal_print("Error opening interactive channel");
         return -1;
     }
+
+    int width  = current_term_width;
+    int height = current_term_height;
+
+    char cols_str[8];
+    char lines_str[8];
+    snprintf(cols_str, sizeof(cols_str), "%d", width);
+    snprintf(lines_str, sizeof(lines_str), "%d", height);
     
     int rc = libssh2_channel_request_pty(interactive_channel, "xterm");
     if (rc) {
@@ -202,6 +230,17 @@ int start_interactive_shell() {
         interactive_channel = NULL;
         return -1;
     }
+    
+    rc = libssh2_channel_request_pty_size(interactive_channel, width, height);
+    if (rc) {
+        char warn_msg[128];
+        snprintf(warn_msg, sizeof(warn_msg), "Warning: Could not set terminal size (%dx%d)", width, height);
+        terminal_print(warn_msg);
+    }
+    
+    libssh2_channel_setenv(interactive_channel, "TERM", "xterm");
+    libssh2_channel_setenv(interactive_channel, "COLUMNS", cols_str);
+    libssh2_channel_setenv(interactive_channel, "LINES", lines_str);
     
     rc = libssh2_channel_shell(interactive_channel);
     if (rc) {
@@ -212,8 +251,6 @@ int start_interactive_shell() {
     }
     
     in_interactive_mode = 1;
-    terminal_print("Interactive shell ready for htop, vim, nano, etc.");
-    terminal_print("Press START to exit interactive mode");
     
     return 0;
 }
@@ -224,8 +261,10 @@ int interactive_shell_read(char *buffer, int buffer_size) {
     }
     
     int n = libssh2_channel_read(interactive_channel, buffer, buffer_size - 1);
+    
     if (n > 0) {
         buffer[n] = '\0';
+        return n;
     } else if (n == 0) {
         return 0;
     } else if (n == LIBSSH2_ERROR_EAGAIN) {
