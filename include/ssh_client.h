@@ -8,17 +8,17 @@ extern char port[16];
 extern char username[64];
 extern char password[64];
 
-// SSH session globals
-extern LIBSSH2_SESSION *session;
-extern LIBSSH2_CHANNEL *channel;
-extern int sock;
-
 int ssh_connect();
 int execute_ssh_command(const char *cmd);
-void cleanup_ssh();
 int start_interactive_shell();
+void stop_interactive_shell();
+void cleanup_ssh();
+
 int interactive_shell_read(char *buffer, int buffer_size);
 int interactive_shell_write(const char *data, int data_len);
-void stop_interactive_shell();
+
+void set_terminal_size(int width, int height);
+int get_terminal_width();
+int get_terminal_height();
 
 #endif
