@@ -17,24 +17,4 @@
 #define CHAR_WIDTH 8
 #define CHAR_HEIGHT 18
 
-typedef enum {
-    APP_STATE_LOADING = 0,
-    APP_STATE_MENU,
-    APP_STATE_SIMPLE_SSH,
-    APP_STATE_PROFILES,
-    APP_STATE_ABOUT,
-    APP_STATE_TERMINAL
-} AppState;
-
-typedef struct {
-    char name[32];
-    char ip[64];
-    char port[16];
-    char username[64];
-    char password[64];
-    int is_default;
-} SshProfile;
-
-#define MAX_PROFILES 10
-
 #endif

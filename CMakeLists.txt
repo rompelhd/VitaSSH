@@ -40,7 +40,6 @@ add_executable(${PROJECT_NAME}
   src/ssh_client.c
   src/shell.c
   src/text.c
-  src/menu.c
 )
 
 target_link_libraries(${PROJECT_NAME}
