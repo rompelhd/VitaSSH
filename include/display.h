@@ -8,6 +8,7 @@
 #define TERM_WIDTH 950
 #define TERM_HEIGHT 430
 
+// interactive
 #define TERMINAL_WIDTH 120
 #define TERMINAL_HEIGHT 24
 

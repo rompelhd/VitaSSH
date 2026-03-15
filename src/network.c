@@ -27,7 +27,7 @@ int load_network_modules() {
     ret = sceSysmoduleIsLoaded(SCE_SYSMODULE_NET_CTL);
     if (ret != SCE_SYSMODULE_LOADED) {
         ret = sceSysmoduleLoadModule(SCE_SYSMODULE_NET_CTL);
-        if (ret < 0 && ret != 0x805A1000) { // Ignore error if already loaded
+        if (ret < 0 && ret != 0x805A1000) { // Ignore error if loaded
             printf("Error loading SceNetCtl: 0x%08X\n", ret);
             sceSysmoduleUnloadModule(SCE_SYSMODULE_NET);
             return -1;

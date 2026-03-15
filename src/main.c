@@ -42,7 +42,6 @@ void get_ssh_credentials_from_profile(SshProfile *profile) {
     uint16_t user_input[MAX_TEXT_LENGTH + 1] = {0};
     uint16_t pass_input[MAX_TEXT_LENGTH + 1] = {0};
     
-
     char temp_ip[64], temp_port[16], temp_user[64], temp_pass[64];
     strncpy(temp_ip, profile->ip, sizeof(temp_ip));
     strncpy(temp_port, profile->port, sizeof(temp_port));
@@ -196,7 +195,7 @@ void render_screen(vita2d_pgf *font) {
             if (line != NULL && strlen(line) > 0) {
                 unsigned int color = get_line_color(line_index);
                 vita2d_pgf_draw_text(font, TEXT_START_X, start_y + i * line_height,
-                                    color, 0.7f, line);
+                                     color, 0.7f, line);
             }
         }
     }
@@ -204,32 +203,35 @@ void render_screen(vita2d_pgf *font) {
     if (total_lines > max_visible_lines) {
         int scrollbar_height = (max_visible_lines * TERM_HEIGHT) / total_lines;
         if (scrollbar_height < 20) scrollbar_height = 20;
+        
         int scrollbar_y = TERM_Y + (scroll_offset * TERM_HEIGHT) / total_lines;
-        vita2d_draw_rectangle(TERM_X + TERM_WIDTH - 10, scrollbar_y, 5, scrollbar_height, RGBA8(150, 150, 150, 255));
+        
+        vita2d_draw_rectangle(TERM_X + TERM_WIDTH - 10, scrollbar_y,
+                              5, scrollbar_height,
+                              RGBA8(150, 150, 150, 255));
 
         char scroll_info[64];
-        snprintf(scroll_info, sizeof(scroll_info), "Lines: %d/%d", 
-                scroll_offset + max_visible_lines, total_lines);
-        vita2d_pgf_draw_text(font, 800, 480, RGBA8(255, 255, 0, 255), 0.6f, scroll_info);
+        snprintf(scroll_info, sizeof(scroll_info),
+                 "Lines: %d/%d",
+                 scroll_offset + max_visible_lines,
+                 total_lines);
+
+        vita2d_pgf_draw_text(font, 800, 480,
+                             RGBA8(255, 255, 0, 255),
+                             0.6f, scroll_info);
     }
 
     int controls_y = TERM_Y + TERM_HEIGHT + 15;
     if (controls_y > 500) controls_y = 500;
     
-    vita2d_draw_rectangle(0, controls_y - 10, 960, 544 - controls_y + 10, RGBA8(40, 40, 40, 255));
-    
-    char controls[256];
-    if (ssh_connected) {
-        strcpy(controls, "△: Shell  ○: Command  □: Disconnect  START: Back to Menu");
-    } else {
-        strcpy(controls, "△: Config SSH  ○: Credentials  X: Connect  START: Back to Menu");
-    }
-    
-    vita2d_pgf_draw_text(font, 20, controls_y,
-                        RGBA8(255, 255, 255, 255), 0.7f, controls);
-    
+    vita2d_draw_rectangle(0, controls_y - 10,
+                          960, 544 - controls_y + 10,
+                          RGBA8(40, 40, 40, 255));
+
     vita2d_pgf_draw_text(font, 20, controls_y + 25,
-                        RGBA8(200, 200, 200, 255), 0.5f, "Touch: Scroll  Back touch: Scroll to bottom");
+                         RGBA8(200, 200, 200, 255),
+                         0.5f,
+                         "Touch: Scroll  Back touch: Scroll to bottom");
 
     vita2d_end_drawing();
     vita2d_swap_buffers();
@@ -284,28 +286,22 @@ int main() {
                 show_main_menu(font, &app_state, &menu_selection);
                 
                 if (new_buttons & SCE_CTRL_UP) {
-                    menu_selection = (menu_selection - 1 + 4) % 4;
+                    menu_selection = (menu_selection - 1 + 3) % 3;
                 }
                 if (new_buttons & SCE_CTRL_DOWN) {
-                    menu_selection = (menu_selection + 1) % 4;
+                    menu_selection = (menu_selection + 1) % 3;
                 }
                 if (new_buttons & SCE_CTRL_CROSS) {
                     switch (menu_selection) {
-                        case 0: // SIMPLE SSH
-                            app_state = APP_STATE_SIMPLE_SSH;
-                            terminal_print("=========================================");
-                            terminal_print("    VitaSSH Terminal");
-                            terminal_print("=========================================");
-                            break;
-                        case 1: // PROFILES
+                        case 0: // PROFILES
                             app_state = APP_STATE_PROFILES;
                             profile_selection = 0;
                             delete_confirm = 0;
                             break;
-                        case 2: // ABOUT
+                        case 1: // ABOUT
                             app_state = APP_STATE_ABOUT;
                             break;
-                        case 3: // EXIT
+                        case 2: // EXIT
                             goto exit_app;
                     }
                 }
@@ -345,7 +341,7 @@ int main() {
                 }
                 if (new_buttons & SCE_CTRL_CIRCLE) {
                     app_state = APP_STATE_MENU;
-                    delete_confirm = 0; 
+                    delete_confirm = 0;
                 }
                 if (new_buttons & SCE_CTRL_CROSS && profile_count > 0) {
                     selected_profile = profiles[profile_selection];
@@ -384,6 +380,7 @@ int main() {
                         delete_timer = current_time;
                         
                         terminal_clear();
+
                         char confirm_msg[64];
                         snprintf(confirm_msg, sizeof(confirm_msg), 
                                 "Delete profile '%s'?", profiles[profile_selection].name);
@@ -401,7 +398,7 @@ int main() {
                         
                         app_state = APP_STATE_PROFILES;
                     } 
-                    else if (current_time - delete_timer < 3000000) { // 3 s conf
+                    else if (current_time - delete_timer < 3000000) {
                         char profile_name[32];
                         strncpy(profile_name, profiles[profile_selection].name, sizeof(profile_name));
                         
@@ -496,7 +493,6 @@ int main() {
                         if (ssh_connected) {
                             shell_start_interactive();
                         } else {
-                            // Usar perfil seleccionado
                             if (profile_count > 0) {
                                 selected_profile = profiles[profile_selection];
                                 strcpy(ip, selected_profile.ip);
@@ -548,7 +544,6 @@ int main() {
             }
                 
             case APP_STATE_TERMINAL:
-                // No Now
                 break;
         }
 

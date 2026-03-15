@@ -75,7 +75,6 @@ void shell_handle_resize() {
 static int interactive_reader_thread(SceSize args, void *argp) {
     interactive_thread_running = 1;
     char buffer[1024];
-
     
     while (interactive_thread_running && shell_active) {
         int n = interactive_shell_read(buffer, sizeof(buffer));
@@ -129,7 +128,6 @@ void shell_stop_interactive() {
     show_keyboard = 0;
     show_special_keys = 0;
     
-    // Restaurar modo normal
     set_interactive_mode(0);
 
     if (interactive_thread >= 0) {

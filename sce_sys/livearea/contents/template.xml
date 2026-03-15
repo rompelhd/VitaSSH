@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<livearea style="a5" format-ver="01.00" content-rev="1">
+  <livearea-background>
+    <image>bg.png</image>
+  </livearea-background>
+  
+  <gate>
+    <startup-image>bg.png</startup-image>
+  </gate>
+  
+  <frame id="frame1">
+    <liveitem>
+      <image>icon0.png</image>
+      <target>app</target>
+    </liveitem>
+  </frame>
+  
+  <frame id="frame2">
+    <liveitem>
+      <text align="center" width="280" valign="top">
+        <str size="28" color="#00FF00" bold="on">VitaSSH</str>
+        <str size="18" color="#CCCCCC">SSH Terminal</str>
+      </text>
+    </liveitem>
+  </frame>
+</livearea>

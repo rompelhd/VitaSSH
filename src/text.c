@@ -144,38 +144,38 @@ void process_ansi_command() {
     char command = term.ansi_buffer[strlen(term.ansi_buffer)-1];
     
     switch (command) {
-        case 'H': case 'f': // Posicionar cursor
+        case 'H': case 'f':
             term.cursor_y = (term.ansi_param_count > 0 && term.ansi_params[0] > 0) ? 
                            term.ansi_params[0] - 1 : 0;
             term.cursor_x = (term.ansi_param_count > 1 && term.ansi_params[1] > 0) ? 
                            term.ansi_params[1] - 1 : 0;
             break;
             
-        case 'A': // Cursor arriba
+        case 'A':
             term.cursor_y -= (term.ansi_param_count > 0 && term.ansi_params[0] > 0) ? 
                             term.ansi_params[0] : 1;
             if (term.cursor_y < 0) term.cursor_y = 0;
             break;
             
-        case 'B': // Cursor abajo
+        case 'B':
             term.cursor_y += (term.ansi_param_count > 0 && term.ansi_params[0] > 0) ? 
                             term.ansi_params[0] : 1;
             if (term.cursor_y >= TERMINAL_HEIGHT) term.cursor_y = TERMINAL_HEIGHT - 1;
             break;
             
-        case 'C': // Cursor derecha
+        case 'C':
             term.cursor_x += (term.ansi_param_count > 0 && term.ansi_params[0] > 0) ? 
                             term.ansi_params[0] : 1;
             if (term.cursor_x >= TERMINAL_WIDTH) term.cursor_x = TERMINAL_WIDTH - 1;
             break;
             
-        case 'D': // Cursor izquierda
+        case 'D':
             term.cursor_x -= (term.ansi_param_count > 0 && term.ansi_params[0] > 0) ? 
                             term.ansi_params[0] : 1;
             if (term.cursor_x < 0) term.cursor_x = 0;
             break;
             
-        case 'J': // Borrar pantalla
+        case 'J':
             if (term.ansi_params[0] == 2) {
                 terminal_clear_screen();
             } else if (term.ansi_params[0] == 0) {
@@ -187,33 +187,30 @@ void process_ansi_command() {
             }
             break;
             
-        case 'K': // Borrar línea
+        case 'K':
             if (term.ansi_params[0] == 0) {
-                // Borrar desde cursor hasta final de línea
                 for (int x = term.cursor_x; x < TERMINAL_WIDTH; x++) {
                     term.screen[term.cursor_y][x].character = ' ';
                 }
             } else if (term.ansi_params[0] == 1) {
-                // Borrar desde inicio hasta cursor
                 for (int x = 0; x <= term.cursor_x; x++) {
                     term.screen[term.cursor_y][x].character = ' ';
                 }
             } else if (term.ansi_params[0] == 2) {
-                // Borrar línea completa
                 terminal_clear_line(term.cursor_y);
             }
             break;
             
-        case 'm': // Atributos de texto
+        case 'm':
             process_ansi_colors();
             break;
             
-        case 's': // Guardar cursor
+        case 's':
             term.saved_cursor_x = term.cursor_x;
             term.saved_cursor_y = term.cursor_y;
             break;
             
-        case 'u': // Restaurar cursor
+        case 'u':
             term.cursor_x = term.saved_cursor_x;
             term.cursor_y = term.saved_cursor_y;
             break;
@@ -327,7 +324,6 @@ void terminal_process_data(const char *data, int length) {
                     break;
                     
                 case '\b':
-                    // Retroceso
                     if (term.cursor_x > 0) {
                         term.cursor_x--;
                     }
@@ -344,13 +340,13 @@ void terminal_process_data(const char *data, int length) {
 }
 
 void terminal_render(vita2d_pgf *font) {
-    int start_x = TEXT_START_X;
-    int start_y = TEXT_START_Y;
+    int start_x = TEXT_START_X;  // term_x + 10 = 5 + 10 = 15
+    int start_y = TEXT_START_Y;  // term_y + 5 = 15 + 5 = 20
     int char_width = CHAR_WIDTH;
     int char_height = CHAR_HEIGHT;
     
-    int max_cols = (TERM_WIDTH - 20) / char_width;
-    int max_rows = (TERM_HEIGHT - 10) / char_height;
+    int max_cols = (TERM_WIDTH - 20) / char_width;  // TERM_WIDTH = 950
+    int max_rows = (TERM_HEIGHT - 10) / char_height; // TERM_HEIGHT = 430
     
     int render_cols = max_cols < TERMINAL_WIDTH ? max_cols : TERMINAL_WIDTH;
     int render_rows = max_rows < TERMINAL_HEIGHT ? max_rows : TERMINAL_HEIGHT;
@@ -361,7 +357,7 @@ void terminal_render(vita2d_pgf *font) {
             
             int screen_x = start_x + x * char_width;
             int screen_y = start_y + y * char_height;
-            
+
             vita2d_draw_rectangle(
                 screen_x,
                 screen_y,
@@ -371,7 +367,7 @@ void terminal_render(vita2d_pgf *font) {
             
             char char_str[2] = {cell->character, '\0'};
             unsigned int text_color = cell->fg_color;
-            
+
             if (cell->bold) {
                 text_color = RGBA8(
                     (text_color >> 0) & 0xFF,
@@ -418,6 +414,7 @@ void terminal_render(vita2d_pgf *font) {
     }
 }
 
+// OLD SYSTEM
 
 void set_terminal_font(vita2d_pgf *font) {
     terminal_font = font;
@@ -624,4 +621,3 @@ void scroll_to_bottom() {
     scroll_offset = max_scroll;
     auto_scroll = 1;
 }
-
