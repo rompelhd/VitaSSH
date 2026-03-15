@@ -74,7 +74,8 @@ int execute_ssh_command(const char *cmd) {
         buffer[n] = '\0';
         
         if (big_buffer_pos + n < sizeof(big_buffer) - 1) {
-            strcat(big_buffer + big_buffer_pos, buffer);
+            //strcat(big_buffer + big_buffer_pos, buffer);
+            memcpy(big_buffer + big_buffer_pos, buffer, n);
             big_buffer_pos += n;
         }
         has_output = 1;

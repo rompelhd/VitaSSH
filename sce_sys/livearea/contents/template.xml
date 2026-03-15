@@ -1,26 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<livearea style="a5" format-ver="01.00" content-rev="1">
-  <livearea-background>
-    <image>bg.png</image>
-  </livearea-background>
-  
-  <gate>
-    <startup-image>bg.png</startup-image>
-  </gate>
-  
-  <frame id="frame1">
-    <liveitem>
-      <image>icon0.png</image>
-      <target>app</target>
-    </liveitem>
-  </frame>
-  
-  <frame id="frame2">
-    <liveitem>
-      <text align="center" width="280" valign="top">
-        <str size="28" color="#00FF00" bold="on">VitaSSH</str>
-        <str size="18" color="#CCCCCC">SSH Terminal</str>
-      </text>
-    </liveitem>
-  </frame>
+<?xml version="1.0" encoding="utf-8"?>
+
+<livearea style="psmobile" format-ver="01.00" content-rev="2">
+    <livearea-background>
+        <image>bg0.png</image>
+    </livearea-background>
+
+    <frame id="frame2">
+        <liveitem default="on">
+            <text valign="bottom" align="left" text-align="left" text-valign="bottom" line-space="3" ellipsis="off">
+                <str color="#ffffff" size="50" bold="on" shadow="on">
+                    VitaSSH
+                </str>
+            </text>
+        </liveitem>
+    </frame>
+
+    <frame id="frame3">
+        <liveitem default="on">
+            <text valign="top" align="left" text-align="left" text-valign="top" line-space="2" ellipsis="off">
+                <str size="22" shadow="on">
+                    by rompelhd
+                </str>
+            </text>
+        </liveitem>
+    </frame>
+
+    <frame id="frame4">
+        <liveitem default="on">
+            <text align="left" text-align="left" word-wrap="off" ellipsis="off">
+                <str size="18" color="#ffffff" shadow="on">
+                    v1.0.0
+                </str>
+            </text>
+        </liveitem>
+    </frame>
+
 </livearea>
+

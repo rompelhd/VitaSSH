@@ -104,28 +104,6 @@ void get_ssh_credentials_from_profile(SshProfile *profile) {
     }
 }
 
-void display_credentials() {
-    if (credentials_entered) {
-        terminal_print("--- SSH Credentials ---");
-        
-        char buffer[128];
-        snprintf(buffer, sizeof(buffer), "IP: %s", ip);
-        terminal_print(buffer);
-        
-        snprintf(buffer, sizeof(buffer), "Port: %s", port);
-        terminal_print(buffer);
-        
-        snprintf(buffer, sizeof(buffer), "Username: %s", username);
-        terminal_print(buffer);
-        
-        terminal_print("Password: ********");
-        terminal_print("-------------------");
-    } else {
-        terminal_print("No credentials configured");
-        terminal_print("Use △ to configure them");
-    }
-}
-
 void connect_ssh() {
     if (!credentials_entered) {
         terminal_print("Error: First configure SSH credentials");
@@ -167,6 +145,7 @@ void disconnect_ssh() {
         cleanup_network();
         ssh_connected = 0;
         terminal_print("SSH disconnected");
+
     } else {
         terminal_print("No active SSH connection");
     }
@@ -230,8 +209,8 @@ void render_screen(vita2d_pgf *font) {
 
     vita2d_pgf_draw_text(font, 20, controls_y + 25,
                          RGBA8(200, 200, 200, 255),
-                         0.5f,
-                         "Touch: Scroll  Back touch: Scroll to bottom");
+                         0.7f,
+                         "△: IShell ○: Command  Touch: Scroll  Back touch: Scroll to bottom START: Close");
 
     vita2d_end_drawing();
     vita2d_swap_buffers();
@@ -522,19 +501,13 @@ int main() {
                                 }
                             }
                         } else {
-                            display_credentials();
+                            //display_credentials();
                         }
                     }
 
                     if (new_buttons & SCE_CTRL_CROSS) {
                         if (!ssh_connected) {
                             connect_ssh();
-                        }
-                    }
-
-                    if (new_buttons & SCE_CTRL_SQUARE) {
-                        if (ssh_connected) {
-                            disconnect_ssh();
                         }
                     }
 

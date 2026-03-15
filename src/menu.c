@@ -64,10 +64,13 @@ void show_main_menu(vita2d_pgf *font, AppState *current_state, int *menu_selecti
     vita2d_start_drawing();
     vita2d_clear_screen();
     
+    float title_scale = 1.2f;
+    float menu_scale = 0.9f;
+
     vita2d_draw_rectangle(0, 0, 960, 544, RGBA8(30, 30, 40, 255));
     
-    vita2d_pgf_draw_text(font, 960/2 - vita2d_pgf_text_width(font, 1.2f, "VitaSSH")/2,
-                        80, RGBA8(0, 255, 0, 255), 1.2f, "VitaSSH");
+    vita2d_pgf_draw_text(font, 960/2 - vita2d_pgf_text_width(font, title_scale, "VitaSSH")/2,
+                        80, RGBA8(0, 255, 0, 255), title_scale, "VitaSSH");
     
     const char *menu_items[] = {
         "PROFILES",
@@ -80,27 +83,27 @@ void show_main_menu(vita2d_pgf *font, AppState *current_state, int *menu_selecti
     
     for (int i = 0; i < 3; i++) {
         int item_y = menu_y + (i * item_spacing);
-        int text_width = vita2d_pgf_text_width(font, 0.9f, menu_items[i]);
+        int text_width = vita2d_pgf_text_width(font, menu_scale, menu_items[i]);
         int item_x = 960/2 - text_width/2;
-        
+
         if (i == *menu_selection) {
             vita2d_draw_rectangle(item_x - 20, item_y - 25, text_width + 40, 40, RGBA8(0, 100, 0, 100));
-            
+
             vita2d_draw_rectangle(item_x - 20, item_y - 25, text_width + 40, 2, RGBA8(0, 255, 0, 255));
             vita2d_draw_rectangle(item_x + text_width + 18, item_y - 25, 2, 42, RGBA8(0, 255, 0, 255));
             vita2d_draw_rectangle(item_x - 20, item_y + 15, text_width + 40, 2, RGBA8(0, 255, 0, 255));
             vita2d_draw_rectangle(item_x - 20, item_y - 25, 2, 42, RGBA8(0, 255, 0, 255));
-            
-            vita2d_pgf_draw_text(font, item_x, item_y, RGBA8(0, 255, 0, 255), 0.9f, menu_items[i]);
-            
-            vita2d_pgf_draw_text(font, item_x - 40, item_y, RGBA8(0, 255, 0, 255), 0.9f, ">");
-            vita2d_pgf_draw_text(font, item_x + text_width + 10, item_y, RGBA8(0, 255, 0, 255), 0.9f, "<");
+
+            vita2d_pgf_draw_text(font, item_x, item_y, RGBA8(0, 255, 0, 255), menu_scale, menu_items[i]);
+
+            vita2d_pgf_draw_text(font, item_x - 40, item_y, RGBA8(0, 255, 0, 255), menu_scale, ">");
+            vita2d_pgf_draw_text(font, item_x + text_width + 10, item_y, RGBA8(0, 255, 0, 255), menu_scale, "<");
         } else {
-            vita2d_pgf_draw_text(font, item_x, item_y, RGBA8(180, 180, 180, 255), 0.9f, menu_items[i]);
+            vita2d_pgf_draw_text(font, item_x, item_y, RGBA8(180, 180, 180, 255), menu_scale, menu_items[i]);
         }
     }
     
-    vita2d_pgf_draw_text(font, 20, 500, RGBA8(150, 150, 150, 255), 0.6f, 
+    vita2d_pgf_draw_text(font, 20, 500, RGBA8(150, 150, 150, 255), 0.7f, 
                         "Use UP/DOWN to navigate, X to select, START to exit");
     
     vita2d_end_drawing();
@@ -169,19 +172,31 @@ void show_profiles_menu(vita2d_pgf *font, AppState *current_state, SshProfile pr
 }
 
 void show_about_screen(vita2d_pgf *font, AppState *current_state) {
+
+    float title_scale = 1.8f;
+    float text_scale = 1.0f;
+    float footer_scale = 0.7f;
+
     vita2d_start_drawing();
     vita2d_clear_screen();
-    
+
     vita2d_draw_rectangle(0, 0, 960, 544, RGBA8(30, 30, 40, 255));
-    
-    vita2d_pgf_draw_text(font, 960/2 - vita2d_pgf_text_width(font, 1.2f, "ABOUT VITASSH")/2,
-                        70, RGBA8(0, 255, 0, 255), 1.2f, "ABOUT VITASSH");
-    
+
+    const char *title = "ABOUT VITASSH v1.0.0";
+
+    vita2d_pgf_draw_text(
+        font,
+        960/2 - vita2d_pgf_text_width(font, title_scale, title)/2,
+        70,
+        RGBA8(0,255,0,255),
+        title_scale,
+        title
+    );
+
     int content_y = 150;
     int line_spacing = 35;
-    
+
     const char *about_lines[] = {
-        "VitaSSH v0.1.3",
         "A full-featured SSH client for PlayStation Vita",
         "",
         "Created by: Rompelhd",
@@ -190,18 +205,36 @@ void show_about_screen(vita2d_pgf *font, AppState *current_state) {
         "- VitaSDK developers",
         "- libssh2 team",
         "",
-        "GitHub: github.com/rompelhd/vitassh"
+        "GitHub: github.com/rompelhd/vitassh",
+        "Paypal: paypal.com/paypalme/RompelhdYT"
     };
-    
-    for (int i = 0; i < sizeof(about_lines)/sizeof(about_lines[0]); i++) {
-        vita2d_pgf_draw_text(font, 960/2 - vita2d_pgf_text_width(font, 0.7f, about_lines[i])/2,
-                            content_y + (i * line_spacing), 
-                            (i == 0 || i == 3) ? RGBA8(0, 255, 0, 255) : RGBA8(200, 200, 200, 255), 
-                            0.7f, about_lines[i]);
+
+    int line_count = sizeof(about_lines) / sizeof(about_lines[0]);
+
+    for (int i = 0; i < line_count; i++) {
+
+        float x = 960/2 - vita2d_pgf_text_width(font, text_scale, about_lines[i]) / 2;
+
+        vita2d_pgf_draw_text(
+            font,
+            x,
+            content_y + (i * line_spacing),
+            (i == 0 || i == 3) ? RGBA8(0,255,0,255) : RGBA8(200,200,200,255),
+            text_scale,
+            about_lines[i]
+        );
     }
-    
-   vita2d_pgf_draw_text(font, 960/2 - vita2d_pgf_text_width(font, 0.6f, "Press ○ to return to menu")/2,
-                    520, RGBA8(150, 150, 150, 255), 0.6f, "Press ○ to return to menu");
+
+    const char *footer = "Press O to return to menu";
+
+    vita2d_pgf_draw_text(
+        font,
+        960/2 - vita2d_pgf_text_width(font, footer_scale, footer)/2,
+        520,
+        RGBA8(150,150,150,255),
+        footer_scale,
+        footer
+    );
 
     vita2d_end_drawing();
     vita2d_swap_buffers();

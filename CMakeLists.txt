@@ -73,8 +73,7 @@ vita_create_self(${PROJECT_NAME}.self ${PROJECT_NAME})
 vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} ${PROJECT_NAME}.self
   VERSION ${VITA_VERSION}
   NAME ${VITA_APP_NAME}
-  FILE ${CMAKE_SOURCE_DIR}/sce_sys/fonts/HackNerdFontMono-Regular.ttf sce_sys/fonts/HackNerdFontMono-Regular.ttf
   FILE ./sce_sys/icon0.png sce_sys/icon0.png
-  FILE ./sce_sys/livearea/contents/bg.png sce_sys/livearea/contents/bg.png
   FILE ./sce_sys/livearea/contents/template.xml sce_sys/livearea/contents/template.xml
+  FILE ./sce_sys/livearea/contents/bg0.png sce_sys/livearea/contents/bg0.png
 )
