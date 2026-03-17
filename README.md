@@ -3,7 +3,8 @@
 VitaSSH is a proof-of-concept SSH client designed specifically for the PlayStation Vita, leveraging **libssh2** for secure shell connections and **VitaSDK** for native Vita hardware integration. This experimental client provides basic SSH terminal functionality on the Vita's unique platform.
 
 ## Screenshot
-<img width="960" height="544" alt="2026-03-13-015838" src="https://github.com/user-attachments/assets/e87a6b40-d69a-4a4d-a69b-3045aa93e30d" />
+<img width="960" height="544" alt="image" src="https://github.com/user-attachments/assets/6dd46da1-1ae0-4790-9b9a-85d6aa143d9d" />
+
 
 ## 🛠 Technical Foundation
 
