@@ -1,0 +1,26 @@
+pkgname=libssh2
+pkgver=1.11.1
+pkgrel=1
+url="https://github.com/libssh2/libssh2"
+source=("https://github.com/libssh2/libssh2/releases/download/libssh2-1.11.1/libssh2-1.11.1.tar.gz")
+
+sha256sums=('SKIP')
+
+build() {
+  cd libssh2-$pkgver
+  ./configure \
+    --host=arm-vita-eabi \
+    --prefix=$VITASDK/arm-vita-eabi \
+    --with-openssl \
+    --with-libssl-prefix=$VITASDK/arm-vita-eabi \
+    --with-libz \
+    --disable-examples-build
+
+  make -j$(nproc)
+}
+
+package() {
+  cd libssh2-$pkgver
+  make DESTDIR=$pkgdir install
+  rm -rf $pkgdir/$prefix/share
+}
