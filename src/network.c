@@ -40,12 +40,6 @@ int load_network_modules() {
 }
 
 int init_network() {
-    FILE *log = fopen("ux0:data/ssh_client_log.txt", "a");
-    if (log) {
-        fprintf(log, "Reserving memory for network...\n");
-        fclose(log);
-    }
-
     net_memid = sceKernelAllocMemBlock("NetMem", SCE_KERNEL_MEMBLOCK_TYPE_USER_RW, 512 * 1024, NULL);
     if (net_memid < 0) {
         printf("Error reserving memory block: 0x%08X\n", net_memid);
